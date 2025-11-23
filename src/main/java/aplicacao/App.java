@@ -16,8 +16,16 @@ public class App extends Application {
     private static Scene scene;
 
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(@SuppressWarnings("exports") Stage stage) throws IOException {
         scene = new Scene(loadFXML("main"), 640, 480);
+
+        // ADICIONANDO O CSS
+        scene.getStylesheets().add(
+            App.class.getResource("/styles.css").toExternalForm()
+        );
+
+        stage.setTitle("Pomodoro's Timer!");
+        stage.setResizable(false);
         stage.setScene(scene);
         stage.show();
     }

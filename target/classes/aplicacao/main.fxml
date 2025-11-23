@@ -9,64 +9,109 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.shape.Arc?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.Button?>
+<?import javafx.geometry.Insets?>
 
 <BorderPane xmlns="http://javafx.com/javafx/13"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="aplicacao.principal"
             prefWidth="800" prefHeight="600">
 
+    <padding>
+        <Insets top="0" right="15" bottom="0" left="15"/>
+    </padding>
+
     <!-- TOPO -->
     <top>
-        <HBox alignment="CENTER" spacing="10">
+    <BorderPane>
+        <!-- BOTÃO DE CONFIGURAÇÕES NO CANTO ESQUERDO -->
+        <left>
             <Button text="⚙" onAction="#openSettings"/>
-            <Label text="Pomodoro's Time!" styleClass="titulo"/>
-        </HBox>
+        </left>
+    </BorderPane>
     </top>
 
     <!-- CENTRO -->
     <center>
-        <HBox spacing="40" alignment="CENTER">
+        <HBox spacing="20" alignment="TOP_CENTER">
 
             <!-- CRONÔMETRO -->
-            <VBox alignment="CENTER" spacing="15" styleClass="card">
-                <Label text="Foco - Ciclo 1/4"/>
+            <VBox alignment="TOP_CENTER" spacing="10">
+                
+                <Label text="Foco - Ciclo 1/4" styleClass="subtitulo"/>
+                
+                <VBox alignment="CENTER" spacing="15" styleClass="card" prefWidth="320" prefHeight="400" maxWidth="320" maxHeight="400">
 
-                <StackPane>
-                    <Circle radius="120" stroke="#dcdcdc" strokeWidth="12" fill="transparent"/>
+                    <StackPane minWidth="300" minHeight="300" maxWidth="300" maxHeight="300">
+                        <Arc fx:id="bgArc"
+                        centerX="150" centerY="150"
+                        radiusX="130" radiusY="130"
+                        startAngle="90"
+                        length="360"
+                        type="OPEN"
+                        stroke="#74a8ad"
+                        strokeWidth="22"
+                        strokeLineCap="ROUND"
+                        fill="transparent"/>
+                    
+                        <Arc fx:id="progressArc"
+                        centerX="150" centerY="150"
+                        radiusX="120" radiusY="120"
+                        startAngle="90"
+                        length="360"
+                        type="OPEN"
+                        stroke="#a2d2d9"
+                        strokeWidth="12"
+                        strokeLineCap="ROUND"
+                        fill="transparent"/>
+                    
+                        <Label fx:id="timerLabel" text="1:00" styleClass="timer" style="-fx-font-size: 36px; -fx-font-weight: bold;"/>
+                    </StackPane>
 
-                    <Arc fx:id="progressArc"
-                         radiusX="120" radiusY="120"
-                         startAngle="90"
-                         length="360"
-                         type="OPEN"
-                         stroke="#4a90e2"
-                         strokeWidth="12"
-                         fill="transparent"/>
-
-                    <Label fx:id="timerLabel" text="25:00" styleClass = "timer" style="-fx-font-size: 36px; -fx-font-weight: bold;"/>
-                </StackPane>
-
-                <HBox spacing="15">
-                    <Button fx:id="btnStart" text="▶" onAction="#startTimer"/>
-                    <Button fx:id="btnPause" text="⏸" onAction="#pauseTimer" visible="false"/>
-                    <Button fx:id="btnReset" text="⟳" onAction="#resetTimer"/>
-                </HBox>
+                    <HBox spacing="15" alignment="CENTER">
+                        <Button fx:id="btnStart" text=" ▶ " onAction="#startTimer"/>
+                        <Button fx:id="btnPause" text=" ⏸ " onAction="#pauseTimer" visible="false"/>
+                        <Button fx:id="btnReset" text=" ⟳ " onAction="#resetTimer"/>
+                    </HBox>
+                </VBox>
             </VBox>
 
-            <!-- RESUMO + TAREFAS -->
-            <VBox spacing="20">
-                <VBox styleClass="card">
-                    <Label text="Resumo"/>
-                    <Label fx:id="resumoLabel" text="Tempo total de foco: 0 minutos"/>
+            <!-- BLOCO RESUMO -->
+            <VBox alignment="TOP_CENTER" spacing="10">
+                <Label text="Resumo" styleClass="subtitulo"/>
+
+                <VBox alignment="TOP_CENTER" spacing="10" styleClass="card" prefWidth="260" prefHeight="200" maxWidth="260" maxHeight="200">
+
+                    <Label fx:id="resumoLabel" text="Tempo total de foco: 0 minutos&#10;Ciclos concluídos no dia: 0&#10;Pomodoros feitos hoje: 0" wrapText="true"
+                    style="-fx-font-size: 11px; -fx-font-weight: bold;"/>
+
+                    <HBox alignment="CENTER" spacing="40">
+                        <VBox alignment="CENTER">
+                            <Label text="Sequência"/>
+                            <Label text="0" style="-fx-font-size: 22px; -fx-font-weight: bold;"/>
+                        </VBox>
+
+                        <VBox alignment="CENTER">
+                            <Label text="Meta diária"/>
+                            <Label text="1" style="-fx-font-size: 22px; -fx-font-weight: bold;"/>
+                        </VBox>
+                    </HBox>
+
+                    <Label text="Concluído: 0 minutos" style="-fx-font-size: 12px;"/>
                 </VBox>
 
-                <VBox styleClass="card">
-                    <Label text="Tarefas"/>
-                    <TextField promptText="Digite uma tarefa"/>
+                <!-- BLOCO TAREFAS -->
+                <VBox alignment="TOP_CENTER" spacing="10">
+                    <Label text="Tarefas" styleClass="subtitulo"/>
+
+                    <VBox alignment="TOP_CENTER" spacing="10" styleClass="card" prefWidth="260" prefHeight="150" maxWidth="260" maxHeight="150">
+                        <Label text="Selecione uma tarefa"/>
+                        <TextField promptText="Digite aqui uma tarefa para a sua sessão" prefWidth="220"/>
+                    </VBox>
                 </VBox>
             </VBox>
-
         </HBox>
     </center>
-
 </BorderPane>

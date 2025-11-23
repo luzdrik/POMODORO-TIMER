@@ -11,18 +11,20 @@
       alignment="CENTER"
       xmlns="http://javafx.com/javafx/13"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="aplicacao.configuracoes">
-
-    <Label text="Configurações"/>
-
+      fx:controller="aplicacao.configuracoes"
+      prefWidth="250" prefHeight="300">
+    
     <TextField promptText="Duração do foco (min)"/>
     <TextField promptText="Pausa curta (min)"/>
     <TextField promptText="Pausa longa (min)"/>
+    <TextField promptText="Número de ciclos até pausa longa"/>
 
-    <CheckBox text="Iniciar próximo ciclo automaticamente"/>
-    <CheckBox text="Manter janela sempre visível"/>
+    <VBox spacing="5" alignment="CENTER">
+        <CheckBox text="Iniciar próximo ciclo automaticamente"/>
+        <CheckBox text="Manter janela sempre visível"/>
+    </VBox>
 
-    <HBox spacing="20">
+    <HBox spacing="20" alignment="CENTER">
         <Button text="Salvar" onAction="#salvar"/>
         <Button text="Cancelar" onAction="#voltar"/>
     </HBox>
