@@ -31,6 +31,7 @@ public class principal {
     public void initialize() {
         atualizarTimer();
         progressArc.setLength(-360);
+        bgArc.setLength(-360);
     }
 
     private void atualizarArcos() {

@@ -24,7 +24,7 @@ public class App extends Application {
             App.class.getResource("/styles.css").toExternalForm()
         );
 
-        stage.setTitle("Pomodoro's Timer!");
+        stage.setTitle("Pomodoro Timer!");
         stage.setResizable(false);
         stage.setScene(scene);
         stage.show();
