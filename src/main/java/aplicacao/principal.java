@@ -9,8 +9,12 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.shape.Arc;
 import javafx.stage.Stage;
+import javafx.util.Duration;
+import javafx.scene.image.ImageView;
+import javafx.animation.ScaleTransition;
 import javafx.util.Duration;
 
 public class principal {
@@ -21,8 +25,9 @@ public class principal {
     @FXML private Button btnStart;
     @FXML private Button btnPause;
     @FXML private Button btnReset;
-
+    
     private Timeline timeline;
+    private ScaleTransition pulseAnimation;
 
     private int tempoTotal = 1 * 60;
     private int tempoRestante = tempoTotal;
@@ -32,6 +37,16 @@ public class principal {
         atualizarTimer();
         progressArc.setLength(-360);
         bgArc.setLength(-360);
+
+        statusImage.setImage(imgParado);
+
+        pulseAnimation = new ScaleTransition(Duration.seconds(1), statusImage);
+        pulseAnimation.setFromX(1.0);
+        pulseAnimation.setFromY(1.0);
+        pulseAnimation.setToX(1.15);
+        pulseAnimation.setToY(1.15);
+        pulseAnimation.setCycleCount(ScaleTransition.INDEFINITE);
+        pulseAnimation.setAutoReverse(true);
     }
 
     private void atualizarArcos() {
@@ -40,8 +55,13 @@ public class principal {
 
     progressArc.setLength(angulo);
     bgArc.setLength(angulo);
-}
+    }
 
+    @FXML
+    private ImageView statusImage;
+
+    private Image imgParado = new Image(getClass().getResource("/imagens/nuvem-limpa.png").toExternalForm());
+    private Image imgRodando = new Image(getClass().getResource("/imagens/nuvem-chuva.png").toExternalForm());
 
     @FXML
     public void startTimer() {
@@ -49,6 +69,9 @@ public class principal {
         if (timeline != null && timeline.getStatus() == Timeline.Status.RUNNING) return;
 
         System.out.println("Timer iniciado");
+
+        statusImage.setImage(imgRodando);
+        pulseAnimation.play();
 
         btnPause.setVisible(true);
         btnStart.setVisible(false);
@@ -78,6 +101,11 @@ public class principal {
             btnStart.setVisible(true);
             btnPause.setVisible(false);
         }
+
+        statusImage.setImage(imgParado);
+        pulseAnimation.stop();
+        statusImage.setScaleX(1);
+        statusImage.setScaleY(1);
     }
 
     @FXML

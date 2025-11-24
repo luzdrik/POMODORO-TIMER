@@ -69,7 +69,15 @@
                             fill="transparent"/>
                         </Pane>
                         
+                        <!-- NUVEM + TIMER-->
+                        <VBox alignment="CENTER" spacing="10">
+                            <ImageView fx:id="statusImage"
+                            fitWidth="100"
+                            fitHeight="100"
+                            preserveRatio="true"/>
+
                         <Label fx:id="timerLabel" text="1:00" styleClass="timer" style="-fx-font-size: 36px; -fx-font-weight: bold;"/>
+                        </VBox>
                     </StackPane>
 
                     <HBox spacing="15" alignment="CENTER">
