@@ -46,6 +46,28 @@
                 <VBox alignment="CENTER" spacing="15" styleClass="card" prefWidth="320" prefHeight="400" maxWidth="320" maxHeight="400">
                     <StackPane minWidth="300" minHeight="300" maxWidth="300" maxHeight="300">
                         <Pane prefWidth="300" prefHeight="300">
+                            <Arc
+                            centerX="150" centerY="150"
+                            radiusX="130" radiusY="130"
+                            startAngle="90"
+                            length="360"
+                            type="OPEN"
+                            stroke="#d1d1d1"
+                            strokeWidth="22"
+                            strokeLineCap="ROUND"
+                            fill="transparent"/>
+
+                            <Arc
+                            centerX="150" centerY="150"
+                            radiusX="120" radiusY="120"
+                            startAngle="90"
+                            length="360"
+                            type="OPEN"
+                            stroke="#d1d1d1"
+                            strokeWidth="12"
+                            strokeLineCap="ROUND"
+                            fill="transparent"/>  
+
                             <Arc fx:id="bgArc"
                             centerX="150" centerY="150"
                             radiusX="130" radiusY="130"
@@ -101,11 +123,13 @@
                         <VBox alignment="CENTER">
                             <Label text="Sequência"/>
                             <Label text="0" style="-fx-font-size: 22px; -fx-font-weight: bold;"/>
+                            <Label text="Dias"/>
                         </VBox>
 
                         <VBox alignment="CENTER">
                             <Label text="Meta diária"/>
                             <Label text="1" style="-fx-font-size: 22px; -fx-font-weight: bold;"/>
+                            <Label text="Hora"/>
                         </VBox>
                     </HBox>
 

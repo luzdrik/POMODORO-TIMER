@@ -118,6 +118,9 @@ public class principal {
         atualizarTimer();
         atualizarArcos();
 
+        statusImage.setImage(imgParado);
+        pulseAnimation.stop();
+
         btnStart.setVisible(true);
         btnPause.setVisible(false);
 
