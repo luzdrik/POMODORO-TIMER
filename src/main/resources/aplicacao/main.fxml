@@ -15,6 +15,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.layout.Pane?>
 
+
 <BorderPane xmlns="http://javafx.com/javafx/13"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="aplicacao.principal"
@@ -41,12 +42,12 @@
             <!-- CRONÔMETRO -->
             <VBox alignment="TOP_CENTER" spacing="10">
                 
-                <Label text="Foco - Ciclo 1/4" styleClass="subtitulo"/>
+                <Label fx:id="focoLabel" text="" styleClass="subtitulo"/>
                 
                 <VBox alignment="CENTER" spacing="15" styleClass="card" prefWidth="320" prefHeight="400" maxWidth="320" maxHeight="400">
                     <StackPane minWidth="300" minHeight="300" maxWidth="300" maxHeight="300">
                         <Pane prefWidth="300" prefHeight="300">
-                            <Arc
+                            <Arc fx:id="circlefundo1"
                             centerX="150" centerY="150"
                             radiusX="130" radiusY="130"
                             startAngle="90"
@@ -57,7 +58,7 @@
                             strokeLineCap="ROUND"
                             fill="transparent"/>
 
-                            <Arc
+                            <Arc fx:id="circlefundo2"
                             centerX="150" centerY="150"
                             radiusX="120" radiusY="120"
                             startAngle="90"
@@ -98,8 +99,15 @@
                             fitHeight="100"
                             preserveRatio="true"/>
 
-                        <Label fx:id="timerLabel" text="1:00" styleClass="timer" style="-fx-font-size: 36px; -fx-font-weight: bold;"/>
+                        <Label fx:id="timerLabel" text="" styleClass="timer" style="-fx-font-size: 36px; -fx-font-weight: bold;"/>
                         </VBox>
+                        
+                        <VBox fx:id="endMessagePane" alignment="CENTER" spacing="20" visible="false">
+                        <Label text="Parabéns!" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: green;"/>
+                            <Label text="Você concluiu todos os ciclos!" style="-fx-font-size: 18px;"/>
+                            <Button text="Reiniciar" onAction="#reiniciarPomodoro"/>
+                        </VBox>
+
                     </StackPane>
 
                     <HBox spacing="15" alignment="CENTER">
@@ -109,7 +117,6 @@
                     </HBox>
                 </VBox>
             </VBox>
-
             <!-- BLOCO RESUMO -->
             <VBox alignment="TOP_CENTER" spacing="10">
                 <Label text="Resumo" styleClass="subtitulo"/>

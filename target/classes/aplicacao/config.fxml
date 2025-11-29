@@ -13,17 +13,21 @@
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="aplicacao.configuracoes"
       prefWidth="250" prefHeight="300">
-    
-    <TextField promptText="Duração do foco (min)"/>
-    <TextField promptText="Pausa curta (min)"/>
-    <TextField promptText="Pausa longa (min)"/>
-    <TextField promptText="Número de ciclos até pausa longa"/>
+      
+    <!-- Campos de configuração -->
+    <TextField fx:id="ciclosField"      promptText="Ciclos (número)"/>
+    <TextField fx:id="focoField"        promptText="Duração do foco (min)"/>
+    <TextField fx:id="pausaCurtaField"  promptText="Pausa curta (min)"/>
+    <TextField fx:id="pausaLongaField"  promptText="Pausa longa (min)"/>
+    <TextField fx:id="cicloPausaLonga"  promptText="Ciclos até pausa longa"/>
 
+    <!-- Checkboxes -->
     <VBox spacing="5" alignment="CENTER">
-        <CheckBox text="Iniciar próximo ciclo automaticamente"/>
-        <CheckBox text="Manter janela sempre visível"/>
+        <CheckBox fx:id="autoCicloCheck" text="Iniciar próximo ciclo automaticamente"/>
+        <CheckBox fx:id="sempreVisivelCheck" text="Manter janela sempre visível"/>
     </VBox>
 
+    <!-- Botões -->
     <HBox spacing="20" alignment="CENTER">
         <Button text="Salvar" onAction="#salvar"/>
         <Button text="Cancelar" onAction="#voltar"/>
