@@ -14,7 +14,10 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.layout.Pane?>
-
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.text.TextFlow?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.control.ScrollPane?>
 
 <BorderPane xmlns="http://javafx.com/javafx/13"
             xmlns:fx="http://javafx.com/fxml/1"
@@ -123,8 +126,7 @@
 
                 <VBox alignment="TOP_CENTER" spacing="10" styleClass="card" prefWidth="260" prefHeight="200" maxWidth="260" maxHeight="200">
 
-                    <Label fx:id="resumoLabel" text="Tempo total de foco: 0 minutos&#10;Ciclos concluídos no dia: 0&#10;Pomodoros feitos hoje: 0" wrapText="true"
-                    style="-fx-font-size: 13px; -fx-font-weight: bold;"/>
+                    <TextFlow fx:id="resumoFlow" prefWidth="220" lineSpacing="1"/>
 
                     <HBox alignment="CENTER" spacing="40">
                         <VBox alignment="CENTER">
@@ -139,17 +141,28 @@
                             <Label text="Hora"/>
                         </VBox>
                     </HBox>
-
-                    <Label text="Concluído: 0 minutos" style="-fx-font-size: 12px;"/>
+                    <ProgressBar fx:id="dailyProgressBar" prefWidth="200" progress="0"/>
+                    <Label fx:id="dailyProgressLabel"/>
                 </VBox>
 
                 <!-- BLOCO TAREFAS -->
                 <VBox alignment="TOP_CENTER" spacing="10">
                     <Label text="Tarefas" styleClass="subtitulo"/>
 
-                    <VBox alignment="TOP_CENTER" spacing="10" styleClass="card" prefWidth="260" prefHeight="150" maxWidth="260" maxHeight="150">
-                        <Label text="Selecione uma tarefa"/>
-                        <TextField promptText="Digite aqui uma tarefa para a sua sessão" prefWidth="220"/>
+                    <VBox spacing="10" styleClass="card" prefWidth="260" prefHeight="143" maxWidth="260" maxHeight="143">
+                        <!-- ADICIONAR TAREFA -->
+                        <HBox alignment="CENTER" spacing="3">
+                            <TextField fx:id="taskInput"
+                                promptText="Nova tarefa..."
+                                prefWidth="185" maxWidth="185"
+                                onAction="#addTask"/>
+                            <Button text="+" onAction="#addTask"/>
+                        </HBox>
+
+                        <!-- LISTA DE TAREFAS ROLÁVEL -->
+                        <ScrollPane fitToWidth="true" prefHeight="200" style="-fx-background-color: transparent; -fx-padding: 0;">
+                            <VBox fx:id="taskList" spacing="6" style="-fx-background-color: transparent;"/>
+                        </ScrollPane>
                     </VBox>
                 </VBox>
             </VBox>

@@ -28,3 +28,12 @@
     -fx-font-size: 48;
     -fx-font-weight: bold;
 }
+
+/* Barra de progresso diária */
+.progress-bar {
+    -fx-min-height: 10;
+}
+.progress-bar .bar {
+    -fx-background-insets: 0; 
+    -fx-padding: 0;
+}

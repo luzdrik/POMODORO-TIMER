@@ -2,8 +2,10 @@ package aplicacao;
 
 import java.io.IOException;
 import java.time.LocalDate;
-
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -12,11 +14,14 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.shape.Arc;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.animation.ScaleTransition;
 
@@ -31,6 +36,8 @@ public class principal {
     @FXML private Button btnReset;
     @FXML private ImageView statusImage;
     @FXML private Label focoLabel;
+    @FXML private ProgressBar dailyProgressBar;
+    @FXML private Label dailyProgressLabel;
 
     private Timeline timeline;
     private ScaleTransition pulseAnimation;
@@ -41,9 +48,14 @@ public class principal {
     private int tempoPausaLonga;
     private int ciclosTotal;
 
-    // Resumo
-    @FXML private Label resumoLabel;
+    // Resumo e Barra de progresso diário
+    @FXML private TextFlow resumoFlow;
     private Resumo resumo = new Resumo();
+    private final int meta = 60;
+
+    // Tarefas
+    @FXML private VBox taskList;
+    @FXML private TextField taskInput;
 
     // Controle do timer
     private int tempoTotal;
@@ -75,6 +87,9 @@ public class principal {
             App.configGlobal.setCicloPausaLonga(ciclosParaPausaLonga);
         }
         
+        // Barra de progresso diário inicial
+        updateDailyProgress(0);
+
         // Seta o primeiro tempo
         tempoTotal = tempoFoco;
         tempoRestante = tempoTotal;
@@ -249,7 +264,6 @@ public class principal {
                 );
                 alert.setTitle("Pomodoro concluído!");
                 alert.setHeaderText("Todos os ciclos foram finalizados.");
-                alert.setContentText("Hora de descansar!");
                 alert.showAndWait();
 
                 // Mostrar a tela final após o alerta
@@ -358,7 +372,6 @@ public class principal {
         btnReset.setVisible(true);
     }
 
-
     public void recarregarConfiguracoes() {
         // Recarrega os valores da config
         tempoFoco = App.configGlobal.getFoco() * 60;
@@ -412,12 +425,80 @@ public class principal {
         endMessagePane.setVisible(true);
     }
 
-    private void atualizarResumo() {
-    resumoLabel.setText(
-        "Tempo total de foco: " + resumo.getTotalFoco() + " minutos\n" +
-        "Ciclos concluídos no dia: " + resumo.getCiclosHoje() + "\n" +
-        "Pomodoros feitos hoje: " + resumo.getPomodorosHoje()
-    );
+    private void updateDailyProgress(double value) {
 
+    // Texto da barra de meta diária - porcentagem
+        int porcentagem = (int) (value * 100);
+        dailyProgressLabel.setText("Concluído: " + porcentagem + "%");
+    }
+
+    private void setResumoText(String foco, String ciclos, String pomodoros) {
+        resumoFlow.getChildren().clear();
+
+        Text t1 = new Text("Tempo total de foco: ");
+        t1.setStyle("-fx-font-weight: bold; -fx-font-size: 12px;");
+
+        Text v1 = new Text(foco + "\n");
+        v1.setStyle("-fx-font-size: 12px;");
+
+        Text t2 = new Text("Ciclos concluídos no dia: ");
+        t2.setStyle("-fx-font-weight: bold; -fx-font-size: 12px;");
+
+        Text v2 = new Text(ciclos + "\n");
+        v2.setStyle("-fx-font-size: 12px;");
+
+        Text t3 = new Text("Pomodoros feitos hoje: ");
+        t3.setStyle("-fx-font-weight: bold; -fx-font-size: 12px;");
+
+        Text v3 = new Text(pomodoros);
+        v3.setStyle("-fx-font-size: 12px;");
+
+        resumoFlow.getChildren().addAll(t1, v1, t2, v2, t3, v3);
+    }
+
+
+    private void atualizarResumo() {
+        setResumoText(
+            resumo.getTotalFoco() + " minutos",
+            String.valueOf(resumo.getCiclosHoje()),
+            String.valueOf(resumo.getPomodorosHoje())
+        );
+
+    double progresso = (double) resumo.getTotalFoco() / meta;
+    if (progresso > 1) progresso = 1;
+
+    dailyProgressBar.setProgress(progresso);
+    updateDailyProgress(progresso);
+    }
+
+    private void addTaskItem(String texto) {
+        HBox item = new HBox(10);
+        item.setStyle("-fx-padding: 5; -fx-background-color: #ffffff; -fx-background-radius: 8;");
+        item.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+        Label label = new Label(texto);
+        label.setStyle("-fx-font-size: 12px;");
+
+        Button concluir = new Button("✔");
+        concluir.setOnAction(e -> {
+            label.setStyle("-fx-text-fill: #999; -fx-font-style: italic; -fx-strikethrough: true;");
+        });
+
+        Button remover = new Button("🗑");
+        remover.setOnAction(e -> taskList.getChildren().remove(item));
+
+        item.getChildren().addAll(label, concluir, remover);
+
+        taskList.getChildren().add(item);
+    }
+
+    @FXML
+    private void addTask() {
+        String texto = taskInput.getText().trim();
+
+        if (texto.isEmpty()) return;
+        
+        addTaskItem(texto);
+        taskInput.clear();
     }
 }
