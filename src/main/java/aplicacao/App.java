@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -29,6 +30,13 @@ public class App extends Application {
 
         stage.setTitle("Pomodoro Timer!");
         stage.setResizable(false);
+        stage.setScene(scene);
+        stage.show();
+
+        // Ícone da API <3
+        Image icon = new Image(App.class.getResource("/imagens/icone.png").toExternalForm());
+        stage.getIcons().add(icon);
+
         stage.setScene(scene);
         stage.show();
     }
