@@ -1,0 +1,24 @@
+{
+  "resumo": {
+    "totalFocoMinutosHoje": 20,
+    "ciclosHoje": 5,
+    "pomodorosHoje": 17,
+    "progressoDiario": 0.3333333333333333,
+    "ultimoDia": "2025-11-30",
+    "streak": 0
+  },
+  "config": {
+    "ciclos": 4,
+    "foco": 25,
+    "pausaCurta": 5,
+    "pausaLonga": 15,
+    "autoCiclo": false,
+    "sempreVisivel": false
+  },
+  "tasks": [],
+  "tasksConcluidas": [
+    "Sociologia"
+  ],
+  "streak": 1,
+  "ultimoDiaCompleto": "2025-11-30"
+}

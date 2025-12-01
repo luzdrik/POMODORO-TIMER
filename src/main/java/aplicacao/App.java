@@ -16,10 +16,14 @@ public class App extends Application {
 
     private static Scene scene;
     
-    public static Config configGlobal = new Config();
     public static principal principalController;
-    public static Resumo resumoGlobal = JSONManager.carregarResumo();
 
+    // Carrega tudo do JSON
+    public static DataModel data;
+
+    // Resumo e Config vêm de "data"
+    public static Resumo resumoGlobal;
+    public static Config configGlobal;
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -34,6 +38,7 @@ public class App extends Application {
         Stage splashStage = new Stage(StageStyle.UNDECORATED);
         Scene splashScene = new Scene(splashRoot);
         splashStage.setScene(splashScene);
+
         splashStage.show();
 
         // Thread para simular a tela de "carregamento"
@@ -57,8 +62,8 @@ public class App extends Application {
                     stage.setScene(scene);
 
                     // Ícone da API <3
-                    Image icon = new Image(App.class.getResource("/imagens/icone.png").toExternalForm());
-                    stage.getIcons().add(icon);
+                    Image icon1 = new Image(App.class.getResource("/imagens/icone.png").toExternalForm());
+                    stage.getIcons().add(icon1);
 
                     stage.show();
                 }
@@ -83,5 +88,15 @@ public class App extends Application {
 
     public static void main(String[] args) {
         launch();
+    }
+
+    static {
+        data = JSONManager.carregarTudo();
+
+        // segurança extra (mesmo com JSONManager corrigido)
+        if (data == null) data = new DataModel();
+
+        resumoGlobal = data.getResumo();
+        configGlobal = data.getConfig();
     }
 }

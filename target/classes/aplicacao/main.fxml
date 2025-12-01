@@ -131,7 +131,7 @@
                     <HBox alignment="CENTER" spacing="40">
                         <VBox alignment="CENTER">
                             <Label text="Sequência"/>
-                            <Label text="0" style="-fx-font-size: 22px; -fx-font-weight: bold;"/>
+                            <Label fx:id="sequenciaLabel" text="0" style="-fx-font-size: 22px; -fx-font-weight: bold;"/>
                             <Label text="Dias"/>
                         </VBox>
 

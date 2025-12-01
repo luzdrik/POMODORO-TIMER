@@ -48,21 +48,30 @@ public class principal {
     private int tempoPausaLonga;
     private int ciclosTotal;
 
-    // Resumo e Barra de progresso diário
+    // Resumo, Barra de progresso diário e sequência de dias
     @FXML private TextFlow resumoFlow;
     private Resumo resumo = new Resumo();
     private final int meta = 60;
+    private StreakManager streakManager = new StreakManager();
+    @FXML private Label sequenciaLabel; // Você ajusta para o ID correto do FXML
 
     // Tarefas
     @FXML private VBox taskList;
     @FXML private TextField taskInput;
-
+    private HBox tarefaSelecionada = null;
+    private String textoTarefaSelecionada = null;
+    private boolean timerRodando = false;
+    private boolean carregando = false;
+    
     // Controle do timer
     private int tempoTotal;
     private int tempoRestante;
 
     private int etapa = 0;
     private int cicloAtual = 1;
+
+    // JSON
+    private DataModel data;
 
     // Nova flag
     private boolean incrementarNoProximoFoco = false;
@@ -80,15 +89,43 @@ public class principal {
         tempoPausaCurta = App.configGlobal.getPausaCurta() * 60;
         tempoPausaLonga = App.configGlobal.getPausaLonga() * 60;
         ciclosTotal = App.configGlobal.getCiclos();
-        int ciclosParaPausaLonga = App.configGlobal.getCicloPausaLonga();
 
-        if (ciclosParaPausaLonga <= 0) {
-            ciclosParaPausaLonga = ciclosTotal;
-            App.configGlobal.setCicloPausaLonga(ciclosParaPausaLonga);
-        }
+        data = JSONManager.carregarTudo();
+        resumo = data.resumo;
+
+        data.tasks = data.tasks.stream()
+        .distinct()
+        .collect(java.util.stream.Collectors.toList());
+        JSONManager.salvarTudo(data);
         
-        // Barra de progresso diário inicial
-        updateDailyProgress(0);
+        resumo.verificarViradaDia();
+        setResumoText(
+            resumo.getTotalFoco() + " minutos",
+            String.valueOf(resumo.getCiclosHoje()),
+            String.valueOf(resumo.getPomodorosHoje())
+        );
+
+        dailyProgressBar.setProgress(resumo.getProgressoDiario());
+        dailyProgressLabel.setText("Concluído: " + (int)(resumo.getProgressoDiario() * 100) + "%");
+
+        // Carrega streak
+        streakManager = new StreakManager(data.streak, data.ultimoDiaCompleto);
+        sequenciaLabel.setText(String.valueOf(streakManager.getStreak()));
+
+        // Carrega tarefas
+        carregando = true;
+        for (String t : data.tasks) {
+            HBox item = addTaskItem(t);
+
+            if (data.tasksConcluidas.contains(t)) {
+                Label label = (Label) item.getChildren().get(0);
+                label.setStyle("-fx-text-fill: #999; -fx-font-style: italic; -fx-strikethrough: true;");
+            }
+        }
+        carregando = false;
+
+        // Sequência de dias
+        sequenciaLabel.setText(String.valueOf(streakManager.getStreak()));
 
         // Seta o primeiro tempo
         tempoTotal = tempoFoco;
@@ -97,7 +134,6 @@ public class principal {
         atualizarTimer();
         atualizarArcos();
         atualizarFocoLabel();
-        atualizarResumo();
 
         // Imagem inicial da nuvem do cronometro
         statusImage.setImage(imgParado);
@@ -130,6 +166,8 @@ public class principal {
 
         System.out.println("Timer iniciado.");
 
+        timerRodando = true;
+
         statusImage.setImage(imgRodando);
         pulseAnimation.play();
 
@@ -159,6 +197,15 @@ public class principal {
                     // Fim da pausa longa, registra no resumo o ciclo (que é igual a 4 pomodoros completos)
                     resumo.registrarCiclo();
                     atualizarResumo();
+
+                    // Atualiza a sequência de dias
+                    streakManager.registerCycleToday();
+
+                    data.streak = streakManager.getStreak();
+                    data.ultimoDiaCompleto = (streakManager.getLastDay() == null ? null : streakManager.getLastDay().toString());
+                    JSONManager.salvarTudo(data);
+                    
+                    sequenciaLabel.setText(String.valueOf(streakManager.getStreak()));
                 }
 
                 proximaEtapa(); // Confere na parte lógica se deve ir para a próxima etapa (sistema de avanço automático)
@@ -173,6 +220,7 @@ public class principal {
     public void pauseTimer() {
         if (timeline != null) {
             timeline.pause();
+            timerRodando = false;
             btnStart.setVisible(true);
             btnPause.setVisible(false);
         }
@@ -185,8 +233,8 @@ public class principal {
 
     @FXML
     public void resetTimer() {
-        if (timeline != null)
-            timeline.stop();
+        if (timeline != null) timeline.stop();
+        timerRodando = false;
 
         tempoRestante = tempoTotal;
         atualizarTimer();
@@ -205,35 +253,27 @@ public class principal {
         timerLabel.setText(String.format("%02d:%02d", minutos, segundos));
     }
 
-    // Lógica para avançar para a próxima etapa do Pomodoro
-
+    // Avançar para a próxima etapa do Pomodoro
     private void proximaEtapa() {
-        int limite = App.configGlobal.getCicloPausaLonga();
-
-        if (limite <= 0) {
-            limite = App.configGlobal.getCiclos(); // Evita divisão por zero
-        } 
-
         if (etapa == 0) { 
             // Fim do foco
-
-            // Atualiza o resumo, colocando o registro do foco
-            resumo.registrarFoco(tempoFoco / 60);  
+            resumo.registrarFoco(tempoFoco / 60);
             atualizarResumo();
-            
-            if (cicloAtual < limite) {
-                etapa = 1; // pausa curta
-                incrementarNoProximoFoco = false;
-            }           
-            else {
+
+            if (cicloAtual % 4 == 0) {
                 etapa = 2; // pausa longa
+                incrementarNoProximoFoco = false;
+            }
+            
+            else {
+                etapa = 1; // pausa curta
                 incrementarNoProximoFoco = false;
             }
         }
 
         else if (etapa == 1) {            
             // Fim da pausa curta
-            etapa = 0;      // Volta para o foco
+            etapa = 0;
             resumo.registrarPomodoro();
             incrementarNoProximoFoco = true;
             atualizarResumo();
@@ -241,52 +281,38 @@ public class principal {
 
         else if (etapa == 2) {
             // Fim da pausa longa
-            cicloAtual = 1;
             etapa = 0;
             resumo.registrarPomodoro();
+            incrementarNoProximoFoco = true;
             atualizarResumo();
-            
-            System.out.println("Todos os ciclos concluídos!");
+        }
 
-            // Para animação
-            statusImage.setImage(imgParado);
-            pulseAnimation.stop();
-            statusImage.setScaleX(1);
-            statusImage.setScaleY(1);
+        if (tarefaSelecionada != null) {
+            taskList.getChildren().remove(tarefaSelecionada);
 
-            // Botões
-            btnPause.setVisible(false);
-            btnStart.setVisible(true);
+            if (textoTarefaSelecionada != null) {
+                data.tasks.removeIf(t -> t.equals(textoTarefaSelecionada));
+                data.tasksConcluidas.removeIf(t -> t.equals(textoTarefaSelecionada));
+            }
 
-            Platform.runLater(() -> {
-                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-                    javafx.scene.control.Alert.AlertType.INFORMATION
-                );
-                alert.setTitle("Pomodoro concluído!");
-                alert.setHeaderText("Todos os ciclos foram finalizados.");
-                alert.showAndWait();
+            JSONManager.salvarTudo(data);
 
-                // Mostrar a tela final após o alerta
-                mostrarMensagemFinal();
-                endMessagePane.setVisible(true);
-            });
-
-            return;
+            tarefaSelecionada = null;
+            textoTarefaSelecionada = null;
         }
 
         definirTempoDaEtapa();
         atualizarFocoLabel();
 
         if (App.configGlobal.isAutoCiclo()) {
-        startTimer();
-        }
-
+            startTimer();
+        }   
+        
         else {
             statusImage.setImage(imgParado);
             pulseAnimation.stop();
             statusImage.setScaleX(1);
             statusImage.setScaleY(1);
-
             btnPause.setVisible(false);
             btnStart.setVisible(true);
         }
@@ -296,12 +322,12 @@ public class principal {
         switch (etapa) {
             case 0: 
             // Entrou em foco
-            tempoTotal = tempoFoco;
-            
             if (incrementarNoProximoFoco) {
                 cicloAtual++;
                 incrementarNoProximoFoco = false;
             }
+
+            tempoTotal = tempoFoco;
             break;
 
             case 1:
@@ -319,12 +345,13 @@ public class principal {
     }
 
     private void atualizarFocoLabel() {
-        focoLabel.setText((etapa == 0 ? "Foco" : etapa == 1 ? "Pausa Curta" : "Pausa Longa")
-                          + " - Ciclo " + cicloAtual + "/" + ciclosTotal);
+        String base = (etapa == 0 ? "Foco" : etapa == 1 ? "Pausa Curta" : "Pausa Longa")
+            + " - Ciclo " + cicloAtual + "/" + ciclosTotal;
+
+        focoLabel.setText(base);
     }
 
     // Abrir as configurações em uma nova janela
-
     @FXML
     private void openSettings() {
         try {
@@ -335,12 +362,55 @@ public class principal {
             stage.setScene(new Scene(root));
             stage.setResizable(false);
             stage.show();
+
+            // Ícone de Configurações <3
+            Image icon2 = new Image(App.class.getResource("/imagens/engrenagem.png").toExternalForm());
+            stage.getIcons().add(icon2);
+
+            stage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    @FXML
+    private void finalizarPomodoro() {
+        System.out.println("Todos os ciclos concluídos!");
+
+        // Registrar ciclo final (se fizer sentido)
+        resumo.registrarCiclo();
+        atualizarResumo();
+
+        // Atualiza streak
+        streakManager.registerCycleToday();
+        data.streak = streakManager.getStreak();
+        data.ultimoDiaCompleto = (streakManager.getLastDay() == null ? null : streakManager.getLastDay().toString());
+        JSONManager.salvarTudo(data);
+        sequenciaLabel.setText(String.valueOf(streakManager.getStreak()));
+
+        // Para animação
+        if (pulseAnimation != null) pulseAnimation.stop();
+        statusImage.setImage(imgParado);
+        statusImage.setScaleX(1);
+        statusImage.setScaleY(1);
+
+        btnPause.setVisible(false);
+        btnStart.setVisible(true);
+
+        Platform.runLater(() -> {
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                javafx.scene.control.Alert.AlertType.INFORMATION
+            );
+            alert.setTitle("Pomodoro concluído!");
+            alert.setHeaderText("Todos os ciclos foram finalizados.");
+            alert.showAndWait();
+
+            // Mostrar a tela final após o alerta
+            mostrarMensagemFinal();
+            endMessagePane.setVisible(true);
+        });
+    }
+
+   @FXML
     private void reiniciarPomodoro() {
 
         endMessagePane.setVisible(false);
@@ -430,6 +500,9 @@ public class principal {
     // Texto da barra de meta diária - porcentagem
         int porcentagem = (int) (value * 100);
         dailyProgressLabel.setText("Concluído: " + porcentagem + "%");
+
+        resumo.setProgressoDiario(value);
+        JSONManager.salvarTudo(data);
     }
 
     private void setResumoText(String foco, String ciclos, String pomodoros) {
@@ -456,7 +529,6 @@ public class principal {
         resumoFlow.getChildren().addAll(t1, v1, t2, v2, t3, v3);
     }
 
-
     private void atualizarResumo() {
         setResumoText(
             resumo.getTotalFoco() + " minutos",
@@ -468,10 +540,15 @@ public class principal {
     if (progresso > 1) progresso = 1;
 
     dailyProgressBar.setProgress(progresso);
-    updateDailyProgress(progresso);
+    dailyProgressLabel.setText("Concluído: " + (int)(progresso * 100) + "%");
+    
+    resumo.setProgressoDiario(progresso);
+
+    data.resumo = resumo;
+    JSONManager.salvarTudo(data);
     }
 
-    private void addTaskItem(String texto) {
+    private HBox addTaskItem(String texto) {
         HBox item = new HBox(10);
         item.setStyle("-fx-padding: 5; -fx-background-color: #ffffff; -fx-background-radius: 8;");
         item.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
@@ -482,14 +559,79 @@ public class principal {
         Button concluir = new Button("✔");
         concluir.setOnAction(e -> {
             label.setStyle("-fx-text-fill: #999; -fx-font-style: italic; -fx-strikethrough: true;");
+
+            if (!data.tasksConcluidas.contains(texto)) {
+                data.tasksConcluidas.add(texto);
+                JSONManager.salvarTudo(data);
+            }
         });
 
+        if (!carregando && !data.tasks.contains(texto)) {
+            data.tasks.add(texto);
+            JSONManager.salvarTudo(data);
+        }
+
+
         Button remover = new Button("🗑");
-        remover.setOnAction(e -> taskList.getChildren().remove(item));
+        remover.setOnAction(e -> {
+            if (timerRodando) {
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                    javafx.scene.control.Alert.AlertType.WARNING
+                );
+                alert.setTitle("Ação não permitida");
+                alert.setHeaderText("Você não pode remover uma tarefa enquanto o cronômetro está ativo.");
+                alert.show();
+                return;
+            }
+            
+            taskList.getChildren().remove(item);
+            data.tasks.removeIf(t -> t.equals(texto));
+
+            JSONManager.salvarTudo(data);
+            
+            if (tarefaSelecionada == item) {
+                tarefaSelecionada = null;
+                textoTarefaSelecionada = null;
+
+                atualizarFocoLabel();
+            }
+        });
+
+        item.setOnMouseClicked(e -> {
+             if (timerRodando) {
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                    javafx.scene.control.Alert.AlertType.WARNING
+                );
+                alert.setTitle("Ação não permitida");
+                alert.setHeaderText("Você não pode selecionar/trocar de tarefa enquanto o cronômetro está ativo.");
+                alert.show();
+                return;
+            }
+
+            if (tarefaSelecionada == item) {
+                item.setStyle("-fx-padding: 5; -fx-background-color: #ffffff;");
+                tarefaSelecionada = null;
+                textoTarefaSelecionada = null;
+                atualizarFocoLabel();
+                return;
+            }
+
+            // Se tinha outra selecionada, tira o destaque dela
+            if (tarefaSelecionada != null) {
+                tarefaSelecionada.setStyle("-fx-padding: 5; -fx-background-color: #ffffff;");
+            }
+
+            // Marca a nova
+            tarefaSelecionada = item;
+            textoTarefaSelecionada = texto;
+            item.setStyle("-fx-padding: 5; -fx-background-color: #c7f2ff;");
+
+            atualizarFocoLabel();
+        });
 
         item.getChildren().addAll(label, concluir, remover);
-
         taskList.getChildren().add(item);
+        return (item);
     }
 
     @FXML
@@ -498,7 +640,21 @@ public class principal {
 
         if (texto.isEmpty()) return;
         
+        if (texto.length() > 20) {
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                javafx.scene.control.Alert.AlertType.WARNING
+            );
+            alert.setTitle("Texto muito longo");
+            alert.setHeaderText("A tarefa deve ter no máximo 20 caracteres.");
+            alert.show();
+            return;
+        }
+
         addTaskItem(texto);
         taskInput.clear();
+    }
+
+    public void setData(DataModel data) {
+        this.data = data;
     }
 }

@@ -19,7 +19,6 @@
     <TextField fx:id="focoField"        promptText="Duração do foco (min)"/>
     <TextField fx:id="pausaCurtaField"  promptText="Pausa curta (min)"/>
     <TextField fx:id="pausaLongaField"  promptText="Pausa longa (min)"/>
-    <TextField fx:id="cicloPausaLonga"  promptText="Ciclos até pausa longa"/>
 
     <!-- Checkboxes -->
     <VBox spacing="5" alignment="CENTER">

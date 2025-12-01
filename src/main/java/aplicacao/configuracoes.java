@@ -8,14 +8,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 
-
 public class configuracoes {
 
     @FXML private TextField ciclosField;
     @FXML private TextField focoField;
     @FXML private TextField pausaCurtaField;
     @FXML private TextField pausaLongaField;
-    @FXML private TextField cicloPausaLonga;
 
     @FXML private CheckBox autoCicloCheck;
     @FXML private CheckBox sempreVisivelCheck;
@@ -26,7 +24,6 @@ public class configuracoes {
         focoField.setText(String.valueOf(App.configGlobal.getFoco()));
         pausaCurtaField.setText(String.valueOf(App.configGlobal.getPausaCurta()));
         pausaLongaField.setText(String.valueOf(App.configGlobal.getPausaLonga()));
-        cicloPausaLonga.setText(String.valueOf(App.configGlobal.getCicloPausaLonga()));
 
         autoCicloCheck.setSelected(App.configGlobal.isAutoCiclo());
         sempreVisivelCheck.setSelected(App.configGlobal.isSempreVisivel());
@@ -39,7 +36,6 @@ public class configuracoes {
             int foco = Integer.parseInt(focoField.getText());
             int pausaCurta = Integer.parseInt(pausaCurtaField.getText());
             int pausaLonga = Integer.parseInt(pausaLongaField.getText());
-            int cicloPausaLongaValor = Integer.parseInt(cicloPausaLonga.getText());
 
             // Condições de validação dos valores
 
@@ -54,7 +50,7 @@ public class configuracoes {
                 mostrarErro("Valor máximo ultrapassado.\nFavor escolher um valor menor para os ciclos.");
                 return;
             }
-        
+
             // Valores máximos absolutos
             if (foco > 60 || pausaCurta > 60 || pausaLonga > 60) {
                 mostrarErro("Todos os tempos devem ser menores ou iguais a 60 minutos.");
@@ -64,11 +60,6 @@ public class configuracoes {
             // Valor mínimo para ciclos (necessário para existir pausa longa)
             if (ciclos < 4) {
                 mostrarErro("O número de ciclos deve ser pelo menos 4.");
-                return;
-            }
-
-            if (cicloPausaLongaValor < 1) {
-                mostrarErro("O valor de 'ciclos até a pausa longa' deve ser pelo menos 1.");
                 return;
             }
 

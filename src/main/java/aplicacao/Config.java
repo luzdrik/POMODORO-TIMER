@@ -6,7 +6,6 @@ public class Config {
     private int foco = 25;
     private int pausaCurta = 5;
     private int pausaLonga = 15;
-    private int cicloPausaLonga = 4;
 
     private boolean autoCiclo = false;
     private boolean sempreVisivel = false;
@@ -22,9 +21,6 @@ public class Config {
 
     public int getPausaLonga() { return pausaLonga; }
     public void setPausaLonga(int pausaLonga) { this.pausaLonga = pausaLonga; }
-
-    public int getCicloPausaLonga() { return cicloPausaLonga; }
-    public void setCicloPausaLonga(int cicloPausaLonga) { this.cicloPausaLonga = cicloPausaLonga; }
 
     public boolean isAutoCiclo() { return autoCiclo; }
     public void setAutoCiclo(boolean autoCiclo) { this.autoCiclo = autoCiclo; }

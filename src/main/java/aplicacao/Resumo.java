@@ -3,16 +3,14 @@ package aplicacao;
 import java.time.LocalDate;
 
 public class Resumo {
+
     private int totalFocoMinutosHoje;
     private int ciclosHoje;
     private int pomodorosHoje;
+    private double progressoDiario;
 
-    private LocalDate ultimoDia;
-    private int streak;
-
-    public Resumo() {
-        this.ultimoDia = LocalDate.now();
-    }
+    private LocalDate ultimoDia = LocalDate.now();
+    private int streak = 1;
 
     public void registrarFoco(int minutos) {
         verificarViradaDia();
@@ -31,10 +29,13 @@ public class Resumo {
 
     public void verificarViradaDia() {
         LocalDate hoje = LocalDate.now();
+
         if (!hoje.equals(ultimoDia)) {
+
             totalFocoMinutosHoje = 0;
             ciclosHoje = 0;
             pomodorosHoje = 0;
+            progressoDiario = 0;
 
             if (ultimoDia.plusDays(1).equals(hoje)) {
                 streak++;
@@ -50,4 +51,9 @@ public class Resumo {
     public int getCiclosHoje() { return ciclosHoje; }
     public int getPomodorosHoje() { return pomodorosHoje; }
     public int getStreak() { return streak; }
+    public double getProgressoDiario() { return progressoDiario; }
+
+    public void setProgressoDiario(double progressoDiario) {
+        this.progressoDiario = progressoDiario;
+    }
 }
