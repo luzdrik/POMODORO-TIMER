@@ -1,4 +1,4 @@
-# ☁️ Pomodoro Timer! ☁️
+# ☁️ Pomodoro Timer!
 ![Status](http://img.shields.io/static/v1?label=STATUS&message=CONCLUÍDO&color=GREEN&style=for-the-badge)
 
 <div align="center">
