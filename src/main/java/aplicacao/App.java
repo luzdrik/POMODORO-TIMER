@@ -41,6 +41,8 @@ public class App extends Application {
 
         splashStage.show();
 
+        stage.setAlwaysOnTop(App.configGlobal.isSempreVisivel());
+
         // Thread para simular a tela de "carregamento"
         new Thread(() -> {
             try {
@@ -93,7 +95,6 @@ public class App extends Application {
     static {
         data = JSONManager.carregarTudo();
 
-        // segurança extra (mesmo com JSONManager corrigido)
         if (data == null) data = new DataModel();
 
         resumoGlobal = data.getResumo();

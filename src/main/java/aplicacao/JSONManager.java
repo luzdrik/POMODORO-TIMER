@@ -33,6 +33,7 @@ public class JSONManager {
             if (data == null) return criarDataModelPadrao();
             if (data.resumo == null) data.resumo = new Resumo();
             if (data.tasks == null) data.tasks = new ArrayList<>();
+            if (data.tasksConcluidas == null) data.tasksConcluidas = new ArrayList<>();
 
             return data;
 
@@ -54,6 +55,7 @@ public class JSONManager {
         DataModel novo = new DataModel();
         novo.resumo = new Resumo();
         novo.tasks = new ArrayList<>();
+        novo.tasksConcluidas = new ArrayList<>();
         return novo;
     }
 }

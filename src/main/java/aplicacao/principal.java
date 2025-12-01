@@ -73,8 +73,9 @@ public class principal {
     // JSON
     private DataModel data;
 
-    // Nova flag
+    // Flags
     private boolean incrementarNoProximoFoco = false;
+    private boolean pomodoroFinalizado = false;
 
     // Fim de todos os ciclos
     @FXML private VBox endMessagePane;
@@ -193,11 +194,7 @@ public class principal {
                 btnPause.setVisible(false);
                 btnStart.setVisible(true);
 
-                if (etapa == 2) { 
-                    // Fim da pausa longa, registra no resumo o ciclo (que é igual a 4 pomodoros completos)
-                    resumo.registrarCiclo();
-                    atualizarResumo();
-
+                if (etapa == 2) {
                     // Atualiza a sequência de dias
                     streakManager.registerCycleToday();
 
@@ -258,9 +255,18 @@ public class principal {
         if (etapa == 0) { 
             // Fim do foco
             resumo.registrarFoco(tempoFoco / 60);
+
+            double incremento = (double)(tempoFoco / 60) / meta;
+            double novoProgresso = resumo.getProgressoDiario() + incremento;
+            if (novoProgresso > 1) novoProgresso = 1;
+
+            resumo.setProgressoDiario(novoProgresso);
             atualizarResumo();
 
             if (cicloAtual % 4 == 0) {
+                resumo.registrarCiclo();
+                atualizarResumo();
+
                 etapa = 2; // pausa longa
                 incrementarNoProximoFoco = false;
             }
@@ -275,6 +281,7 @@ public class principal {
             // Fim da pausa curta
             etapa = 0;
             resumo.registrarPomodoro();
+            
             incrementarNoProximoFoco = true;
             atualizarResumo();
         }
@@ -283,30 +290,17 @@ public class principal {
             // Fim da pausa longa
             etapa = 0;
             resumo.registrarPomodoro();
+            
             incrementarNoProximoFoco = true;
             atualizarResumo();
-        }
-
-        if (tarefaSelecionada != null) {
-            taskList.getChildren().remove(tarefaSelecionada);
-
-            if (textoTarefaSelecionada != null) {
-                data.tasks.removeIf(t -> t.equals(textoTarefaSelecionada));
-                data.tasksConcluidas.removeIf(t -> t.equals(textoTarefaSelecionada));
-            }
-
-            JSONManager.salvarTudo(data);
-
-            tarefaSelecionada = null;
-            textoTarefaSelecionada = null;
         }
 
         definirTempoDaEtapa();
         atualizarFocoLabel();
 
-        if (App.configGlobal.isAutoCiclo()) {
+        if (!pomodoroFinalizado && App.configGlobal.isAutoCiclo()) {
             startTimer();
-        }   
+        } 
         
         else {
             statusImage.setImage(imgParado);
@@ -325,6 +319,11 @@ public class principal {
             if (incrementarNoProximoFoco) {
                 cicloAtual++;
                 incrementarNoProximoFoco = false;
+            }
+    
+            if (cicloAtual > ciclosTotal) {
+                finalizarPomodoro();
+            return;
             }
 
             tempoTotal = tempoFoco;
@@ -345,6 +344,10 @@ public class principal {
     }
 
     private void atualizarFocoLabel() {
+        if (pomodoroFinalizado) {
+            return;
+        }
+
         String base = (etapa == 0 ? "Foco" : etapa == 1 ? "Pausa Curta" : "Pausa Longa")
             + " - Ciclo " + cicloAtual + "/" + ciclosTotal;
 
@@ -375,11 +378,14 @@ public class principal {
 
     private void finalizarPomodoro() {
         System.out.println("Todos os ciclos concluídos!");
+        pomodoroFinalizado = true;
 
-        // Registrar ciclo final (se fizer sentido)
-        resumo.registrarCiclo();
-        atualizarResumo();
-
+        if (timeline != null) {
+            timeline.stop();
+            timeline = null;
+        }
+        timerRodando = false;
+        
         // Atualiza streak
         streakManager.registerCycleToday();
         data.streak = streakManager.getStreak();
@@ -395,6 +401,20 @@ public class principal {
 
         btnPause.setVisible(false);
         btnStart.setVisible(true);
+
+        if (tarefaSelecionada != null) {
+            taskList.getChildren().remove(tarefaSelecionada);
+
+            if (textoTarefaSelecionada != null) {
+                data.tasks.removeIf(t -> t.equals(textoTarefaSelecionada));
+                data.tasksConcluidas.removeIf(t -> t.equals(textoTarefaSelecionada));
+            }
+
+            JSONManager.salvarTudo(data);
+
+            tarefaSelecionada = null;
+            textoTarefaSelecionada = null;
+        }
 
         Platform.runLater(() -> {
             javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
@@ -413,6 +433,14 @@ public class principal {
    @FXML
     private void reiniciarPomodoro() {
 
+        // Se houver timeline rodando, limpa
+        if (timeline != null) {
+            timeline.stop();
+            timeline = null;
+        }
+        timerRodando = false;
+        pomodoroFinalizado = false;
+        
         endMessagePane.setVisible(false);
 
         progressArc.setVisible(true);
@@ -443,13 +471,19 @@ public class principal {
     }
 
     public void recarregarConfiguracoes() {
+        
+
         // Recarrega os valores da config
         tempoFoco = App.configGlobal.getFoco() * 60;
         tempoPausaCurta = App.configGlobal.getPausaCurta() * 60;
         tempoPausaLonga = App.configGlobal.getPausaLonga() * 60;
         ciclosTotal = App.configGlobal.getCiclos();
-
-        // Reinicia o estado do timer
+        
+        // Janela sempre vísivel
+        Stage stagePrincipal = (Stage) timerLabel.getScene().getWindow();
+        stagePrincipal.setAlwaysOnTop(App.configGlobal.isSempreVisivel());
+        
+        // Reinicia o UI do timer
         if (timeline != null) {
             timeline.stop();
         }
@@ -536,38 +570,38 @@ public class principal {
             String.valueOf(resumo.getPomodorosHoje())
         );
 
-    double progresso = (double) resumo.getTotalFoco() / meta;
+    double progresso = resumo.getProgressoDiario();
     if (progresso > 1) progresso = 1;
 
     dailyProgressBar.setProgress(progresso);
     dailyProgressLabel.setText("Concluído: " + (int)(progresso * 100) + "%");
-    
-    resumo.setProgressoDiario(progresso);
 
     data.resumo = resumo;
     JSONManager.salvarTudo(data);
     }
 
-    private HBox addTaskItem(String texto) {
+    private HBox addTaskItem(String texto) {    
+        final String textoCopy = texto; //
+    
         HBox item = new HBox(10);
         item.setStyle("-fx-padding: 5; -fx-background-color: #ffffff; -fx-background-radius: 8;");
         item.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
-        Label label = new Label(texto);
+        Label label = new Label(textoCopy);
         label.setStyle("-fx-font-size: 12px;");
 
         Button concluir = new Button("✔");
         concluir.setOnAction(e -> {
             label.setStyle("-fx-text-fill: #999; -fx-font-style: italic; -fx-strikethrough: true;");
 
-            if (!data.tasksConcluidas.contains(texto)) {
-                data.tasksConcluidas.add(texto);
+            if (!data.tasksConcluidas.contains(textoCopy)) {
+                data.tasksConcluidas.add(textoCopy);
                 JSONManager.salvarTudo(data);
             }
         });
 
-        if (!carregando && !data.tasks.contains(texto)) {
-            data.tasks.add(texto);
+        if (!carregando && !data.tasks.contains(textoCopy)) {
+            data.tasks.add(textoCopy);
             JSONManager.salvarTudo(data);
         }
 
@@ -585,7 +619,7 @@ public class principal {
             }
             
             taskList.getChildren().remove(item);
-            data.tasks.removeIf(t -> t.equals(texto));
+            data.tasks.removeIf(t -> t.equals(textoCopy));
 
             JSONManager.salvarTudo(data);
             
@@ -623,7 +657,7 @@ public class principal {
 
             // Marca a nova
             tarefaSelecionada = item;
-            textoTarefaSelecionada = texto;
+            textoTarefaSelecionada = textoCopy;
             item.setStyle("-fx-padding: 5; -fx-background-color: #c7f2ff;");
 
             atualizarFocoLabel();
