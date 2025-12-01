@@ -3,7 +3,6 @@
 
 <div align="center">
   <p float="left">
-    <img src="https://i.imgur.com/SJzvcpt.png" width="300" />
     <img src="https://i.imgur.com/khLTUF6.png" alt="Logo Pomodoro Timer" width="300"/>
     <img src="https://i.imgur.com/SJzvcpt.png" width="300" />
   </p><b>Trabalhando duro… mas com fofura!</b>  
