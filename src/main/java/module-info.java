@@ -1,5 +1,6 @@
 module aplicacao {
     requires javafx.controls;
+    requires javafx.media;
     requires javafx.fxml;
     requires java.prefs;
     requires com.google.gson;

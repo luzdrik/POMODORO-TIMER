@@ -1,11 +1,11 @@
 {
   "resumo": {
-    "totalFocoMinutosHoje": 10,
-    "ciclosHoje": 2,
-    "pomodorosHoje": 9,
-    "progressoDiario": 0.08333333333333333,
-    "ultimoDia": "2025-11-30",
-    "streak": 0
+    "totalFocoMinutosHoje": 17,
+    "ciclosHoje": 4,
+    "pomodorosHoje": 17,
+    "progressoDiario": 0.2833333333333333,
+    "ultimoDia": "2025-12-01",
+    "streak": 1
   },
   "config": {
     "ciclos": 4,
@@ -17,6 +17,6 @@
   },
   "tasks": [],
   "tasksConcluidas": [],
-  "streak": 1,
-  "ultimoDiaCompleto": "2025-11-30"
+  "streak": 2,
+  "ultimoDiaCompleto": "2025-12-01"
 }

@@ -24,6 +24,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.animation.ScaleTransition;
+import javafx.scene.media.AudioClip;
 
 public class principal {
     @FXML private Label timerLabel;
@@ -79,6 +80,11 @@ public class principal {
 
     // Fim de todos os ciclos
     @FXML private VBox endMessagePane;
+
+    // Sons do cronômetro
+    private AudioClip somPadrao;
+    private AudioClip somPomodoro;
+
 
     @FXML
     public void initialize() {
@@ -147,6 +153,17 @@ public class principal {
         pulseAnimation.setToY(1.15);
         pulseAnimation.setCycleCount(ScaleTransition.INDEFINITE);
         pulseAnimation.setAutoReverse(true);
+
+        // Carregar os sons do cronômetro
+        somPadrao = new AudioClip(getClass().getResource("/sons/alarm-default.wav").toString());
+        somPomodoro = new AudioClip(getClass().getResource("/sons/alarm-pomodoro.wav").toString());
+        
+        // Evita o delay dos sons
+        somPadrao.play(0.00001);
+        somPadrao.stop();
+
+        somPomodoro.play(0.00001);
+        somPomodoro.stop();
     }
 
     private void atualizarArcos() {
@@ -176,15 +193,18 @@ public class principal {
         btnStart.setVisible(false);
 
         timeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
-
             tempoRestante--;
 
             atualizarTimer();
             atualizarArcos();
 
             if (tempoRestante <= 0) {
-                 timeline.stop();
+                timeline.stop();
 
+                if (cicloAtual >= ciclosTotal && etapa == 0) {
+                    somPadrao.play();
+                }
+                
                 // Animação volta para o estado parado
                 statusImage.setImage(imgParado);
                 pulseAnimation.stop();
@@ -378,7 +398,14 @@ public class principal {
 
     private void finalizarPomodoro() {
         System.out.println("Todos os ciclos concluídos!");
+
+        btnStart.setVisible(false);
+        btnPause.setVisible(false);
+        btnReset.setVisible(false);
+
+        somPomodoro.play();
         pomodoroFinalizado = true;
+        
 
         if (timeline != null) {
             timeline.stop();
@@ -420,6 +447,7 @@ public class principal {
             javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
                 javafx.scene.control.Alert.AlertType.INFORMATION
             );
+            alert.initOwner(timerLabel.getScene().getWindow());
             alert.setTitle("Pomodoro concluído!");
             alert.setHeaderText("Todos os ciclos foram finalizados.");
             alert.showAndWait();
