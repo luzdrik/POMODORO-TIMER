@@ -620,6 +620,7 @@ public class principal {
             
             taskList.getChildren().remove(item);
             data.tasks.removeIf(t -> t.equals(textoCopy));
+            data.tasksConcluidas.removeIf(t -> t.equals(textoCopy));
 
             JSONManager.salvarTudo(data);
             
@@ -684,6 +685,16 @@ public class principal {
             return;
         }
 
+        if (data.tasks.stream().anyMatch(t -> t.equalsIgnoreCase(texto))) {
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                javafx.scene.control.Alert.AlertType.WARNING
+            );
+            alert.setTitle("Tarefa duplicada");
+            alert.setHeaderText("Já existe uma tarefa com esse nome.");
+            alert.show();
+            return;
+        }
+        
         addTaskItem(texto);
         taskInput.clear();
     }
